@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="ta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>என் நூலகம்</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600&family=Noto+Serif+Tamil:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f3ee; --side:#efeae2; --panel:#fffdf9; --line:#ddd5c8; --line2:#c9bfae;
+  --ink:#2a2420; --ink2:#6b6157; --ink3:#9a8f83;
+  --accent:#8a3b1e; --accent-bg:#f3e3d8; --hover:#e6dfd3; --sel:#ddd2c2; --page-bg:#d9d2c7;
+  --sans:"Noto Sans Tamil",system-ui,sans-serif; --serif:"Noto Serif Tamil",Georgia,serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#1b1917; --side:#221f1c; --panel:#2a2623; --line:#3a3530; --line2:#4d4640;
+  --ink:#ece6de; --ink2:#b0a69a; --ink3:#857b70;
+  --accent:#e09a74; --accent-bg:#3d2a20; --hover:#2f2b27; --sel:#3a3430; --page-bg:#141210;
+}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);display:grid;grid-template-columns:300px 1fr;overflow:hidden}
+body.collapsed{grid-template-columns:0 1fr}
+button{font:inherit;color:inherit;background:none;border:1px solid var(--line2);border-radius:8px;padding:6px 10px;cursor:pointer;line-height:1.2}
+button:hover{background:var(--hover)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;padding:10px 18px;font-weight:500}
+button.primary:hover{opacity:.9;background:var(--accent)}
+input{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:8px 10px;width:100%;outline:none}
+input:focus{border-color:var(--accent)}
+
+/* sidebar */
+aside{background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.brand{padding:16px 16px 12px;font-family:var(--serif);font-size:20px;font-weight:600}
+.brand small{display:block;font-family:var(--sans);font-size:12px;font-weight:400;color:var(--ink3)}
+.switch{display:flex;gap:2px;margin:0 16px;padding:3px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.switch button{flex:1;border:none;border-radius:7px;padding:6px 2px;font-size:13px;color:var(--ink2)}
+.switch button.on{background:var(--accent-bg);color:var(--accent);font-weight:500}
+.search{position:relative;margin:12px 16px 6px}
+.dd{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--panel);border:1px solid var(--line2);border-radius:10px;overflow:hidden;z-index:10;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.dd:empty{display:none}
+.sg{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;cursor:pointer;font-size:14px}
+.sg:hover,.sg.act{background:var(--hover)}
+.sg .ic{color:var(--ink3);font-size:13px;margin-top:2px;width:16px;text-align:center}
+.list{flex:1;overflow-y:auto;padding:6px 10px 20px}
+.gh{display:flex;align-items:center;gap:6px;padding:12px 8px 4px;font-size:12px;color:var(--ink2);cursor:pointer;user-select:none}
+.gh .chev{transition:transform .15s;display:inline-block;width:10px}
+.gh.closed .chev{transform:rotate(-90deg)}
+.book{padding:8px 10px;border-radius:8px;cursor:pointer}
+.book:hover{background:var(--hover)}
+.book.on{background:var(--sel)}
+.indent .book{margin-left:14px}
+.bt{font-size:15px;font-weight:500}
+.meta{font-size:12px;color:var(--ink3);margin-top:1px}
+.parts{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 2px}
+.chip{font-size:12px;padding:2px 8px;border-radius:20px;border:1px solid var(--line2);color:var(--ink2);cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.count{color:var(--ink3)}
+.foot{padding:10px 16px;border-top:1px solid var(--line);font-size:12px;color:var(--ink3);display:flex;justify-content:space-between;gap:8px}
+.foot a{color:var(--ink2);cursor:pointer;text-decoration:underline}
+
+/* reader */
+main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.bar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+.bar .ttl{flex:1;min-width:160px}
+.bar .ttl b{font-family:var(--serif);font-size:18px;font-weight:600}
+.bar .parts{margin:0}
+.bar .chip{font-size:13px;padding:4px 12px}
+.tools{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--ink2)}
+.tools input{width:64px;padding:5px 8px;text-align:center}
+.tools .sep{width:1px;height:22px;background:var(--line);margin:0 4px}
+.tools button{padding:5px 9px;min-width:34px}
+.tools button.on{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+.viewer{flex:1;overflow:hidden;background:var(--page-bg);position:relative;min-height:0}
+.viewer.zoomed{overflow:auto}
+.pagewrap{padding:10px;display:flex;justify-content:center;align-items:center;min-width:fit-content;min-height:100%;box-sizing:border-box}
+canvas{display:block;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+body.night canvas{filter:invert(.9) hue-rotate(180deg) sepia(.15)}
+.empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--ink2);text-align:center;padding:24px;background:var(--bg)}
+.empty h2{font-family:var(--serif);font-weight:600;color:var(--ink);margin:0}
+.empty p{margin:0;max-width:440px;line-height:1.6}
+.empty code{background:var(--hover);padding:1px 6px;border-radius:4px;font-size:13px}
+.toggle{border:none;font-size:18px;padding:4px 8px}
+.navzone{position:absolute;top:0;bottom:0;width:18%;cursor:pointer;z-index:2}
+.navzone.l{left:0}.navzone.r{right:0}
+.spin{width:28px;height:28px;border:3px solid var(--line2);border-top-color:var(--accent);border-radius:50%;animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+@media (max-width:760px){
+  body,body.collapsed{grid-template-columns:1fr}
+  aside{position:fixed;inset:0 20% 0 0;z-index:20;transition:transform .2s;box-shadow:4px 0 24px rgba(0,0,0,.2)}
+  body.collapsed aside{transform:translateX(-105%)}
+  .bar .ttl b{font-size:16px}
+}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">என் நூலகம்<small>My library</small></div>
+  <div class="switch" id="switch">
+    <button data-m="all" class="on">All</button>
+    <button data-m="author">Author</button>
+    <button data-m="genre">Genre</button>
+    <button data-m="language">Language</button>
+  </div>
+  <div class="search">
+    <input id="q" placeholder="தேடு · Search books, authors" autocomplete="off">
+    <div class="dd" id="dd"></div>
+  </div>
+  <div class="list" id="list"></div>
+  <div class="foot"><span id="foot"></span><a id="reconnect" hidden title="Choose the pdfs folder again">Change folder</a></div>
+</aside>
+
+<main>
+  <div class="bar">
+    <button class="toggle" id="toggle" title="Show or hide the book list">☰</button>
+    <div class="ttl"><b id="tt">என் நூலகம்</b><div class="meta" id="tm">Pick a book from the list</div></div>
+    <div class="parts" id="barParts"></div>
+    <div class="tools" id="tools" hidden>
+      <button id="prev" title="Previous page (←)">‹</button>
+      <input id="pageIn" type="text" inputmode="numeric" autocomplete="off" title="Type a page number and press Enter">
+      <span id="pageOf">/ –</span>
+      <button id="next" title="Next page (→)">›</button>
+      <span class="sep"></span>
+      <button id="zoomOut" title="Smaller">−</button>
+      <button id="zoomFit" title="Fit to width">Fit</button>
+      <button id="zoomIn" title="Bigger">+</button>
+      <span class="sep"></span>
+      <button id="night" title="Night reading">☾</button>
+    </div>
+  </div>
+  <div class="viewer" id="viewer">
+    <div class="navzone l" id="zl" title="Previous page"></div>
+    <div class="navzone r" id="zr" title="Next page"></div>
+    <div class="pagewrap"><canvas id="cv"></canvas></div>
+    <div class="empty" id="msg"><h2>வணக்கம்!</h2><p>Choose a book on the left, or search by title or author.</p></div>
+  </div>
+</main>
+
+<input type="file" id="dirInput" webkitdirectory multiple hidden>
+
+<script src="books.js"></script>
+<script src="lib/pdf.min.js"></script>
+<script>
+const BOOKS = (window.LIBRARY || []);
+const $ = id => document.getElementById(id);
+const pdfjs = window.pdfjsLib;
+if (pdfjs) pdfjs.GlobalWorkerOptions.workerSrc = "lib/pdf.worker.min.js";
+
+// ================= saved state =================
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("lib:" + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("lib:" + k, JSON.stringify(v)); } catch {} }
+};
+let state = Object.assign({ mode: "all", book: null, part: {}, page: {}, open: {}, zoom: 1, night: false }, store.get("state", {}));
+const save = () => store.set("state", state);
+
+// ================= helpers =================
+const norm = s => (s || "").toLowerCase().replace(/[\s.\-_]/g, "");
+const groupKey = { author: b => [b.author], genre: b => b.genre || ["Other"], language: b => [b.language || "Other"] };
+const authorEn = name => (BOOKS.find(b => b.author === name) || {}).authorEn;
+const sub = b => [b.titleEn !== b.title ? b.titleEn : null, b.author + (b.authorEn ? " · " + b.authorEn : "")].filter(Boolean).join(" · ");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+// ================= sidebar =================
+function bookEl(b) {
+  const d = document.createElement("div");
+  const isCur = state.book === b.id;
+  d.className = "book" + (isCur ? " on" : "");
+  const pi = state.part[b.id];
+  let html = `<div class="bt">${esc(b.title)}</div><div class="meta">${esc(sub(b))}</div>`;
+  if (b.translator) html += `<div class="meta">Translated from ${esc(b.originalLanguage || "?")} · ${esc(b.translator)}</div>`;
+  if (pi !== undefined && state.page[b.id + ":" + pi] > 1)
+    html += `<div class="meta">Continue · ${esc(b.parts[pi].label)}, page ${state.page[b.id + ":" + pi]}</div>`;
+  if (b.parts.length > 1)
+    html += `<div class="parts">` + b.parts.map((p, i) => `<span class="chip${isCur && (pi || 0) === i ? " on" : ""}" data-p="${i}">${i + 1}</span>`).join("") + `</div>`;
+  d.innerHTML = html;
+  d.onclick = e => { const p = e.target.dataset.p; openBook(b.id, p !== undefined ? +p : undefined); };
+  return d;
+}
+
+function drawList() {
+  const L = $("list"); L.innerHTML = "";
+  document.querySelectorAll("#switch button").forEach(x => x.classList.toggle("on", x.dataset.m === state.mode));
+  if (!BOOKS.length) { L.innerHTML = `<div class="meta" style="padding:12px">No books yet. Add them in books.js.</div>`; return; }
+  if (state.mode === "all") { [...BOOKS].sort((a, b) => a.titleEn.localeCompare(b.titleEn)).forEach(b => L.appendChild(bookEl(b))); return; }
+  const groups = {};
+  BOOKS.forEach(b => groupKey[state.mode](b).forEach(k => (groups[k] = groups[k] || []).push(b)));
+  Object.keys(groups).sort().forEach(g => {
+    const id = state.mode + ":" + g, isOpen = state.open[id] !== false;
+    const h = document.createElement("div");
+    h.className = "gh" + (isOpen ? "" : " closed");
+    const en = state.mode === "author" && authorEn(g) ? " · " + authorEn(g) : "";
+    h.innerHTML = `<span class="chev">▾</span>${esc(g + en)} <span class="count">(${groups[g].length})</span>`;
+    h.onclick = () => { state.open[id] = !isOpen; save(); drawList(); };
+    L.appendChild(h);
+    if (isOpen) { const w = document.createElement("div"); w.className = "indent"; groups[g].forEach(b => w.appendChild(bookEl(b))); L.appendChild(w); }
+  });
+}
+
+// ================= finding the PDF files =================
+// 1) normal load (works when the folder is served, or in some browsers)
+// 2) a folder the reader connected once (Chrome / Edge remember it)
+// 3) a folder picked this session (other browsers)
+let pickedFiles = null;   // Map of relative path -> File
+let dirHandle = null;
+
+const idb = {
+  db: null,
+  open() { return this.db || (this.db = new Promise((ok, no) => { const r = indexedDB.open("my-library", 1); r.onupgradeneeded = () => r.result.createObjectStore("kv"); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); })); },
+  async get(k) { try { const db = await this.open(); return await new Promise(ok => { const r = db.transaction("kv").objectStore("kv").get(k); r.onsuccess = () => ok(r.result); r.onerror = () => ok(undefined); }); } catch { return undefined; } },
+  async set(k, v) { try { const db = await this.open(); db.transaction("kv", "readwrite").objectStore("kv").put(v, k); } catch {} }
+};
+
+class NeedFolder extends Error {}
+class NeedPermission extends Error {}
+
+// Books are matched by file name, so it doesn't matter which folder level is chosen
+// ("my-library", "pdfs" or "raja-thilagam"), or whether capitals/spaces differ a little.
+const fileKey = p => (p.split("/").pop() || "").toLowerCase().replace(/[\s_\-]+/g, "");
+let handleIndex = null;   // Map fileKey -> FileSystemFileHandle
+let lastPickError = "";
+
+async function indexHandle(dir, depth = 0, map = new Map()) {
+  if (depth > 4) return map;
+  for await (const [name, h] of dir.entries()) {
+    if (h.kind === "file" && /\.pdf$/i.test(name)) { if (!map.has(fileKey(name))) map.set(fileKey(name), h); }
+    else if (h.kind === "directory" && !name.startsWith(".") && name !== "lib") await indexHandle(h, depth + 1, map);
+  }
+  return map;
+}
+
+function fromPicked(path) {
+  if (!pickedFiles) return null;
+  return pickedFiles.get(fileKey(path)) || null;
+}
+
+async function loadBytes(path) {
+  if (location.protocol !== "file:") {
+    try { const r = await fetch(encodeURI(path)); if (r.ok) return await r.arrayBuffer(); } catch {}
+  }
+  const f1 = fromPicked(path);
+  if (f1) return await f1.arrayBuffer();
+  if (!dirHandle) dirHandle = await idb.get("dir");
+  if (dirHandle) {
+    let perm = "granted";
+    try { if (dirHandle.queryPermission) perm = await dirHandle.queryPermission({ mode: "read" }); } catch {}
+    if (perm !== "granted") throw new NeedPermission();
+    if (!handleIndex) handleIndex = await indexHandle(dirHandle);
+    const h = handleIndex.get(fileKey(path));
+    if (h) return await (await h.getFile()).arrayBuffer();
+    throw new NeedFolder("missing");
+  }
+  throw new NeedFolder();
+}
+
+function useOtherPicker() { $("dirInput").value = ""; $("dirInput").click(); }
+
+async function connectFolder() {
+  if (!window.showDirectoryPicker) return useOtherPicker();
+  try {
+    const h = await window.showDirectoryPicker({ id: "my-library-pdfs", mode: "read" });
+    dirHandle = h; handleIndex = null; pickedFiles = null;
+    await idb.set("dir", h);
+    $("reconnect").hidden = false;
+    openBook(state.book);
+  } catch (e) {
+    if (e && e.name === "AbortError") return;           // reader pressed Cancel
+    lastPickError = (e && (e.name + ": " + e.message)) || String(e);
+    showMsg(`<h2>Let's try the other way</h2><p>Your browser didn't allow that folder window. Click below and choose the same <code>pdfs</code> folder. If the browser asks “Upload files?”, click <b>Upload</b>. Nothing leaves your computer.</p><button class="primary" id="otherBtn">Choose the folder</button><p class="meta">${esc(lastPickError)}</p>`);
+    $("otherBtn").onclick = useOtherPicker;
+  }
+}
+$("dirInput").onchange = e => {
+  const files = [...e.target.files].filter(f => /\.pdf$/i.test(f.name));
+  pickedFiles = new Map();
+  files.forEach(f => { if (!pickedFiles.has(fileKey(f.name))) pickedFiles.set(fileKey(f.name), f); });
+  if (!files.length) {
+    showMsg(`<h2>No PDF files in that folder</h2><p>Choose the folder that has your book PDFs inside (the <code>pdfs</code> folder).</p><button class="primary" id="againBtn">Choose again</button>`);
+    $("againBtn").onclick = useOtherPicker;
+    return;
+  }
+  openBook(state.book);
+};
+$("reconnect").onclick = () => { dirHandle = null; handleIndex = null; connectFolder(); };
+
+// ================= reader =================
+let doc = null, docKey = null, rendering = null, loadToken = 0;
+
+function showMsg(html) { $("msg").innerHTML = html; $("msg").hidden = false; }
+function hideMsg() { $("msg").hidden = true; }
+
+async function openBook(id, partIdx, page) {
+  const b = BOOKS.find(x => x.id === id); if (!b) return;
+  state.book = id;
+  if (partIdx !== undefined) state.part[id] = partIdx;
+  const pi = state.part[id] || 0;
+  const key = id + ":" + pi;
+  if (page !== undefined) state.page[key] = page;
+  save();
+
+  const part = b.parts[pi];
+  $("tt").textContent = b.title + (b.parts.length > 1 ? " — " + part.label : "");
+  $("tm").textContent = [b.author, (b.genre || []).join(", "), b.language].filter(Boolean).join(" · ");
+  $("barParts").innerHTML = b.parts.length > 1 ? b.parts.map((p, i) => `<span class="chip${i === pi ? " on" : ""}" data-p="${i}">${esc(p.label)}</span>`).join("") : "";
+  document.title = b.title + " · என் நூலகம்";
+  drawList();
+  if (window.innerWidth <= 760) document.body.classList.add("collapsed");
+
+  if (docKey === key && doc) { $("tools").hidden = false; return renderPage(state.page[key] || 1); }
+
+  const token = ++loadToken;
+  $("tools").hidden = true;
+  showMsg(`<div class="spin"></div><p>Opening ${esc(part.label)}…</p>`);
+  if (!pdfjs) { showMsg(`<h2>Viewer files missing</h2><p>The <code>lib</code> folder should sit next to <code>index.html</code>. Unzip the whole folder again.</p>`); return; }
+  try {
+    const bytes = await loadBytes(part.file);
+    if (token !== loadToken) return;
+    if (doc) { doc.destroy(); doc = null; }
+    doc = await pdfjs.getDocument({ data: new Uint8Array(bytes) }).promise;
+    if (token !== loadToken) return;
+    docKey = key;
+    $("tools").hidden = false;
+    $("pageOf").textContent = "/ " + doc.numPages;
+    hideMsg();
+    renderPage(state.page[key] || 1);
+  } catch (e) {
+    if (token !== loadToken) return;
+    docKey = null;
+    if (e instanceof NeedPermission) {
+      showMsg(`<h2>Welcome back</h2><p>Your browser asks once per visit before the library can open your books.</p><button class="primary" id="allowBtn">Open my books</button>`);
+      $("allowBtn").onclick = async () => {
+        let ok = false;
+        try { ok = (await dirHandle.requestPermission({ mode: "read" })) === "granted"; } catch {}
+        if (ok) openBook(state.book); else { dirHandle = null; handleIndex = null; connectFolder(); }
+      };
+    } else if (e instanceof NeedFolder && e.message === "missing") {
+      const found = [...(pickedFiles || handleIndex || new Map()).values()].map(x => x.name).slice(0, 12);
+      showMsg(`<h2>Book file not found</h2><p>Looking for <code>${esc(part.file.split("/").pop())}</code>, but the folder you chose doesn't have it.</p>
+        <p class="meta">${found.length ? "PDFs found there: " + found.map(esc).join(", ") : "No PDF files were found in that folder."}</p>
+        <p>Rename the file to match, or change the name in <code>books.js</code>.</p><button id="pickAgain">Choose a different folder</button>`);
+      $("pickAgain").onclick = () => { dirHandle = null; handleIndex = null; connectFolder(); };
+    } else if (e instanceof NeedFolder) {
+      showMsg(`<h2>Connect your books folder</h2><p>Your browser keeps web pages from opening files on their own. Show it your <code>pdfs</code> folder once, and the library can open every book inside it.</p><button class="primary" id="connectBtn">Choose the pdfs folder</button><p class="meta">${window.showDirectoryPicker ? "Chrome and Edge remember this, so you only do it once." : "This browser asks again each time you open the library. Chrome or Edge remember it."}</p>`);
+      $("connectBtn").onclick = connectFolder;
+    } else {
+      showMsg(`<h2>Couldn't open this book</h2><p>The file <code>${esc(part.file)}</code> may be damaged or not a PDF.</p><p class="meta">${esc(e && e.message || e)}</p>`);
+    }
+  }
+}
+
+async function renderPage(n) {
+  if (!doc) return;
+  n = Math.max(1, Math.min(doc.numPages, n | 0 || 1));
+  const key = docKey;
+  state.page[key] = n; save();
+  $("pageIn").value = n;
+  const page = await doc.getPage(n);
+  const base = page.getViewport({ scale: 1 });
+  // Fit the whole page inside the reading area (no scrolling); + zooms in beyond that.
+  const v = $("viewer");
+  v.classList.toggle("zoomed", state.zoom > 1);
+  const availW = Math.max(200, v.clientWidth - 20), availH = Math.max(200, v.clientHeight - 20);
+  const scale = Math.min(availW / base.width, availH / base.height) * state.zoom;
+  const vp = page.getViewport({ scale });
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const cv = $("cv");
+  if (rendering) { try { rendering.cancel(); } catch {} }
+  const off = document.createElement("canvas");
+  off.width = Math.floor(vp.width * dpr); off.height = Math.floor(vp.height * dpr);
+  rendering = page.render({ canvasContext: off.getContext("2d"), viewport: vp, transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : null });
+  try { await rendering.promise; } catch { return; }
+  if (docKey !== key) return;
+  cv.width = off.width; cv.height = off.height;
+  cv.style.width = Math.floor(vp.width) + "px"; cv.style.height = Math.floor(vp.height) + "px";
+  cv.getContext("2d").drawImage(off, 0, 0);
+  $("viewer").scrollTop = 0;
+  drawList();
+}
+
+const cur = () => state.page[docKey] || 1;
+const turn = d => doc && renderPage(cur() + d);
+$("prev").onclick = () => turn(-1);
+$("next").onclick = () => turn(1);
+$("zl").onclick = () => turn(-1);
+$("zr").onclick = () => turn(1);
+const typedPage = () => parseInt(($("pageIn").value || "").replace(/\D/g, ""), 10);
+$("pageIn").oninput = e => { e.target.value = e.target.value.replace(/\D/g, ""); };
+$("pageIn").onkeydown = e => { if (e.key === "Enter") { const n = typedPage(); n ? renderPage(n) : ($("pageIn").value = cur()); e.target.blur(); } };
+$("pageIn").onblur = () => { const n = typedPage(); if (n && n !== cur()) renderPage(n); else $("pageIn").value = cur(); };
+$("zoomIn").onclick = () => { state.zoom = Math.min(3, +(state.zoom + 0.2).toFixed(2)); renderPage(cur()); };
+$("zoomOut").onclick = () => { state.zoom = Math.max(0.4, +(state.zoom - 0.2).toFixed(2)); renderPage(cur()); };
+$("zoomFit").onclick = () => { state.zoom = 1; renderPage(cur()); };
+$("night").onclick = () => { state.night = !state.night; save(); applyNight(); };
+function applyNight() { document.body.classList.toggle("night", state.night); $("night").classList.toggle("on", state.night); }
+$("barParts").onclick = e => { if (e.target.dataset.p !== undefined) openBook(state.book, +e.target.dataset.p); };
+$("toggle").onclick = () => { document.body.classList.toggle("collapsed"); setTimeout(() => doc && renderPage(cur()), 50); };
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT") return;
+  if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); turn(1); }
+  if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); turn(-1); }
+});
+let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => doc && renderPage(cur()), 200); });
+
+// ================= view switch =================
+document.querySelectorAll("#switch button").forEach(btn => btn.onclick = () => { state.mode = btn.dataset.m; save(); drawList(); });
+
+// ================= search with suggestions =================
+function score(terms, q) {
+  let best = 0;
+  terms.filter(Boolean).forEach(t => {
+    const n = norm(t);
+    if (n.startsWith(q)) best = Math.max(best, 3);
+    else if (t.toLowerCase().split(/\s+/).some(w => norm(w).startsWith(q))) best = Math.max(best, 2);
+    else if (n.includes(q)) best = Math.max(best, 1);
+  });
+  return best;
+}
+let active = -1, results = [];
+function suggest() {
+  const q = norm($("q").value), dd = $("dd"); dd.innerHTML = ""; active = -1; results = [];
+  if (!q) return;
+  const authors = {};
+  BOOKS.forEach(b => { authors[b.author] = authors[b.author] || new Set([b.author, b.authorEn]); (b.authorKeywords || []).forEach(k => authors[b.author].add(k)); });
+  Object.entries(authors).forEach(([a, terms]) => {
+    const s = score([...terms], q);
+    if (s) results.push({ s: s + 0.5, icon: "✎", main: a, sub: "Author" + (authorEn(a) ? " · " + authorEn(a) : ""),
+      go: () => { state.mode = "author"; Object.keys(authors).forEach(x => state.open["author:" + x] = x === a); save(); drawList(); } });
+  });
+  BOOKS.forEach(b => {
+    const s = score([b.title, b.titleEn, b.author, b.authorEn, ...(b.keywords || []), ...(b.authorKeywords || []), ...(b.genre || [])], q);
+    if (s) results.push({ s, icon: "📖", main: b.title, sub: sub(b), go: () => openBook(b.id) });
+  });
+  results.sort((x, y) => y.s - x.s); results = results.slice(0, 8);
+  if (!results.length) { dd.innerHTML = `<div class="sg"><span class="meta">No matches. Try another spelling.</span></div>`; return; }
+  results.forEach((r, i) => {
+    const d = document.createElement("div"); d.className = "sg";
+    d.innerHTML = `<span class="ic">${r.icon}</span><div><div>${esc(r.main)}</div><div class="meta">${esc(r.sub)}</div></div>`;
+    d.onmousedown = e => { e.preventDefault(); pick(i); };
+    dd.appendChild(d);
+  });
+}
+function pick(i) { const r = results[i]; if (!r) return; r.go(); $("q").value = ""; $("dd").innerHTML = ""; $("q").blur(); }
+$("q").oninput = suggest;
+$("q").onblur = () => setTimeout(() => $("dd").innerHTML = "", 120);
+$("q").onkeydown = e => {
+  const items = [...$("dd").querySelectorAll(".sg")];
+  if ((e.key === "ArrowDown" || e.key === "ArrowUp") && items.length) {
+    e.preventDefault(); active = (active + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+    items.forEach((x, i) => x.classList.toggle("act", i === active));
+  } else if (e.key === "Enter") pick(active < 0 ? 0 : active);
+  else if (e.key === "Escape") { $("dd").innerHTML = ""; $("q").blur(); }
+};
+
+// ================= start =================
+const nAuthors = new Set(BOOKS.map(b => b.author)).size;
+$("foot").textContent = `${BOOKS.length} book${BOOKS.length === 1 ? "" : "s"} · ${nAuthors} author${nAuthors === 1 ? "" : "s"}`;
+if (state.v !== 3) { state.zoom = 1; state.v = 3; save(); }   // start this version at "fit page"
+applyNight();
+drawList();
+idb.get("dir").then(h => { if (h) { dirHandle = h; $("reconnect").hidden = false; } });
+if (state.book && BOOKS.some(b => b.id === state.book)) openBook(state.book);
+</script>
+</body>
+</html>
